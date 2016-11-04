@@ -1,0 +1,85 @@
+##Step 1: Preprocess the data
+
+-Centralize the data to be zero-centric: X -= np.mean(X, axis = 0)
+-Not very common in images to normilize the data: X /= np.std(X, axis = 0)
+(assuming X [NxD] is data matrix, each example in a row)
+-Make covariance structure be diagonal by for instance applying PCA or even whitening the data squishing it also not very common in image recognition.
+
+**In practice for images center only.**
+
+###Example:
+Consider CIFAR-10 with [32, 32, 3] images.
+
+-Subtract the mean image (e.g. AlexNet)
+(mean image = [32.32.3] array)
+
+-Subtract per-channel mean (e.g. VGGNet)
+(mean along each channel = 3 numebrs)
+obs: not common to normalize variacne, to do PCA or whitening.
+
+
+###Weight Initialization
+
+-First idea: Small random numbers
+(Gaussian with zero mean and 1e-2 standard deviation).
+
+  W = 0.01* np.random.randn(D,H)
+
+Works ~okay for small networks, but can lead to
+non-homogenneous distributions of activations 
+across the layers of a network.
+
+When doing the opposite, choosing a big number, 
+e.g. *1.0 instead of *0.01, the neurons saturate 
+(either -1 and 1) and gradients become all zero.
+
+Proper initialization is an active area of research.
+
+-Batch Normalization:
+
+"you want unit gaussian activations? just make them so."
+
+Consider a batch of activations at some layer.
+To make each dimension unit gaussian, apply:
+
+x-hat^k = x^k - E[x^k] / sqrt(Var[x^k])
+
+Normalize using the above then allow the network
+to squash the range if it wants to:
+
+y^k = gama^k*x-hat^k + B^k
+
+The network can learn:
+gama^k = sqrt(Var[x^k])
+B^k = E[x^k]
+to recover the identity
+mapping.
+
+Usually inserted after Fully Connected or Convolutional layers, and before
+nonlinearity.
+
+Fully Connected -> Batch Normalization -> tanh -> Fully Connected -> BN -> tanh -> ..
+
+**Input:** Values of x over a mini-btach B = {x1...m};
+       Parameters to be learned: g(gama), B
+
+**Output:** {*y*_i = BN_gi_B(x_i)}
+
+-Improves gradient flow through the network
+-Allows higher learning rates
+-Reduces the strong dependence on initialization
+-Acts as a form or regularization in a funny way,
+and slightly reduces the need for dropout,
+maybe.
+
+**Obs:** at test time BatchNorm layer functions differently:
+
+The mean/std are not computed based on
+the batch. Instead, a single fixed empirical
+mean of activations during training is used.
+
+(e.g. can be estimated during training 
+with running averages)
+
+##Step 2: Choose the archtecture:
+
