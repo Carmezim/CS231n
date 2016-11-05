@@ -82,4 +82,46 @@ mean of activations during training is used.
 with running averages)
 
 ##Step 2: Choose the archtecture:
+Double check that the los is reasonable.
+
+Tip: Make sure that 
+you can overfit very 
+small portions of the 
+training data.
+
+Start with small regularization and find
+learning rate that makes the loss go down.
+
+**Loss not going down:** learning rate too low.
+
+###Hyperparameter Optimization
+Cross-validations strategy
+
+Coarse -> fine cross-validation in stages.
+Find what works well.
+Run finer search.
+
+Random Search vs. Grid Search
+Always use random.
+
+Hyperparameters to play with:
+-Network Architecture.
+-Learning rate, its decay schedule, update type.
+-Regularization (L2/Dropout Strength)
+Monitor and visualize the loss curve.
+Monitor and visualize the accuracy:
+big gap = overfitting
+=> increase regularizations strenght?
+no gap
+=> increase model capacity?
+
+Track the ratio of the wight updates / weight maginitudes.
+
+##Summary
+-Activation Functions: use ReLU
+-Data Preprocessing: images: subtract mean
+-Weight Initialization: use Xavier init
+-Batch Normalization: use
+-Babysitting the Learning process
+-Hyperparameter Optimization
 
