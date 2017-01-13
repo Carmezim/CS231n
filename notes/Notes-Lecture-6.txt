@@ -1,0 +1,98 @@
+### Momentum Update:
+
+#### RMSProp
+```
+# RMSProp
+cache = decay_rate * cache + (1 - decay_rate) * dx**2
+x += - learning_rate * dx / (np.sqrt(cache) + 1e-7) #1e-7 hyperparameter to avoid zero value
+```
+
+
+#### Adam update
+(incomplete, but close)
+
+```
+m = beta1*m + (1-beta1)*dx  # update first moment
+v = beta2*v + (1-beta2)*(dx**2) #update second moment	 
+x += -learning_rate * m / (np.sqrt(v) + 1e-7) 
+```
+`beta1` and `beta2` hyperparameters. 
+Usually `beta1 = .9`, `beta2 = .995`.
+Usually not cross-validate it but set fixed values.
+
+Looks a bit like RMSProp with momentum
+
+```
+# momentum
+m = beta1*m + (1-beta1)*dx 
+#RMSProp-like
+v = beta2*v + (1-beta2)*(dx**2)	
+x += -learning_rate * m / (np.sqrt(v) + 1e-7)
+```
+
+
+(Adam complete)
+```
+# Adam
+m, v = #... initialize caches to zeros
+  for t in xrange(0, big_number):
+  dx = #... evaluate gradient
+  m = beta1*m + (1-beta1)*dx # update first moment
+  v = beta2*v + (1-beta2)*(dx**2) #update second moment	 
+  m /= 1-beta1**t # correct bias.   (Bias correction is only relevant in 
+  v /= 1-beta2**t # correct bias.    first few iterations when t is small)
+  x += -learning_rate * m / (np.sqrt(v) + 1e-7) 
+```
+The bias corection compensates for the fact that `m, v` are 
+initialized at zero and need some time to "warm up". 
+
+
+### Learning-rate
+
+1. Start with a high learning rate because it opmtimizes faster but at some point it will
+become too stochastic not converging nicely into minimas in the loss function.
+
+2. Decay the learning rate over time (e.g. decay learning rate by half every few epochs).
+
+*exponential decay:* (usually in practise use it)
+alpha = alpha_0*e^-kt
+
+*1/t decay:*
+alpha = alpha_0/(1 + kt)
+
+### Second order optimization methods
+
+#### Second-Order Taylor Expansion
+
+#### Solving for the critial point we obtain the Newton parameter update
+(no hyperparameters, e.g. learning rates)
+
+Impractical for training Deep Neural nets
+Hessian will be gigantic. e.g. 100mm parameter network, 
+Hessian will be 100mm X 100mm matrix and inverted.
+
+#### Quasi-Newton methods (*BGFS* most popular):
+
+Instead of inverting the Hessian (O(n^3)), 
+approximate inverse Hessian with rank 1 updates over time (O(n^2) each).
+
+#### L-BFGS (Limited memory BFGS):
+
+Does not form/store the full inverse Hessian.
+
+-Usually works very well in full batch, deterministic mode
+i.e. if you have a single, deterministic f(x) then L-BFGS will
+probably work very nicely
+
+- Does not transfer very well to mini-batch setting. 
+Gives bad results. Adapting L-BFGS to large-scale, stochastic 
+setting is an active area of research.
+
+### In practice
+
+- *Adam* is a good default choice in most cases
+
+- If you can afford to do full batch updates then you try 
+out *L-BFGS* (and don't forget to disable all sources of noise)
+
+
